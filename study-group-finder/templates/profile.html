@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-person-gear me-2"></i>Your profile</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">Profile Settings</h1>
+        <p class="text-muted mb-0">Update your study interests so group recommendations stay relevant.</p>
+    </div>
+    <a class="btn btn-outline-secondary px-4" href="{{ url_for('user.dashboard') }}">Back to Dashboard</a>
+</section>
+
+<div class="profile-grid">
+    <aside class="profile-card p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="avatar-pill"><i class="bi bi-person-circle"></i></div>
+            <div>
+                <div class="text-muted small">Signed in as</div>
+                <div class="fw-bold">{{ current_user.name }}</div>
+            </div>
+        </div>
+
+        <div class="profile-stat mb-4">
+            <div class="profile-stat-block">
+                <div class="profile-stat-label">Groups Joined</div>
+                <div class="profile-stat-value">{{ current_user.memberships|length }}</div>
+            </div>
+            <div class="profile-stat-block">
+                <div class="profile-stat-label">Groups Created</div>
+                <div class="profile-stat-value">{{ current_user.created_groups|length }}</div>
+            </div>
+        </div>
+
+        <h2 class="h6 fw-bold mb-2">Quick tips</h2>
+        <ul class="detail-list mb-0">
+            <li>List subjects as comma-separated topics.</li>
+            <li>Keep availability concise and specific.</li>
+            <li>Choose the skill level that best fits your current confidence.</li>
+        </ul>
+    </aside>
+
+    <section class="card app-card border-0 shadow-sm">
+        <div class="card-body p-4 p-lg-5">
+            <form method="post" class="d-grid gap-3 js-loading-form">
+                <div>
+                    <label for="name" class="form-label fw-semibold">Name</label>
+                    <input id="name" type="text" name="name" value="{{ current_user.name }}" class="form-control" required>
+                </div>
+
+                <div>
+                    <label for="subjects" class="form-label fw-semibold">Subjects</label>
+                    <input
+                        id="subjects"
+                        type="text"
+                        name="subjects"
+                        value="{{ current_user.subjects }}"
+                        class="form-control"
+                        placeholder="e.g., Math, Physics, Computer Science"
+                    >
+                    <div class="form-help mt-1">Separate each subject with a comma to improve group matching.</div>
+                </div>
+
+                <div>
+                    <label for="skill_level" class="form-label fw-semibold">Skill Level</label>
+                    <select id="skill_level" name="skill_level" class="form-select">
+                        <option value="Beginner" {{ 'selected' if current_user.skill_level == 'Beginner' else '' }}>Beginner</option>
+                        <option value="Intermediate" {{ 'selected' if current_user.skill_level == 'Intermediate' else '' }}>Intermediate</option>
+                        <option value="Advanced" {{ 'selected' if current_user.skill_level == 'Advanced' else '' }}>Advanced</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="availability" class="form-label fw-semibold">Availability</label>
+                    <textarea
+                        id="availability"
+                        name="availability"
+                        rows="4"
+                        class="form-control"
+                        placeholder="e.g., Mon 6PM, Wed 7PM, Sat 10AM"
+                    >{{ current_user.availability }}</textarea>
+                    <div class="form-help mt-1">Use the same format across days to make schedules easier to compare.</div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-1">
+                    <a class="btn btn-outline-secondary px-4" href="{{ url_for('user.dashboard') }}">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4" data-loading-label="Saving...">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

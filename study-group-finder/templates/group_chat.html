@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Group Chat | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-chat-dots me-2"></i>Premium Chat</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">{{ group.subject }} Chat</h1>
+        <p class="text-muted mb-0">Real-time style collaboration for premium users. Your role: {{ role|title }}.</p>
+    </div>
+    <a class="btn btn-outline-secondary px-4" href="{{ url_for('group.browse_groups') }}">Back to Browse</a>
+</section>
+
+<section class="card app-card border-0 mb-4">
+    <div class="card-body p-4 chat-scroll" id="chatScroll">
+        {% if messages %}
+            <div class="chat-message-list">
+                {% for message in messages %}
+                    <article class="chat-bubble {{ 'self' if message.user_id == current_user.id else '' }}">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                            <strong>{{ message.user.name }}</strong>
+                            <span class="small text-muted">{{ message.created_at.strftime('%d %b %I:%M %p') }}</span>
+                        </div>
+                        <p class="mb-0">{{ message.content }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state rounded-4 p-4">
+                <h3 class="h6 fw-bold mb-2">No messages yet</h3>
+                <p class="text-muted mb-0">Start the conversation and coordinate your next session.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="card app-card border-0">
+    <div class="card-body p-4">
+        <form method="post" class="d-flex gap-2 flex-wrap js-loading-form">
+            <textarea name="content" rows="2" maxlength="800" class="form-control" placeholder="Write a message..." required></textarea>
+            <button type="submit" class="btn btn-primary align-self-end" data-loading-label="Sending...">Send</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

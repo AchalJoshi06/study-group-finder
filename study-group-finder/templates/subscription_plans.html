@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Plans | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-gem me-2"></i>Subscription</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">Choose Your Plan</h1>
+        <p class="text-muted mb-0">Start free and upgrade when you need advanced collaboration tools.</p>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <article class="card app-card h-100 border-0">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2 class="h4 mb-0">Free Plan</h2>
+                    <span class="plan-pill free">Current by default</span>
+                </div>
+                <p class="text-muted">Great for getting started with study collaboration.</p>
+                <ul class="detail-list mb-4">
+                    <li>Up to 3 created groups</li>
+                    <li>Up to 5 joined groups</li>
+                    <li>Public groups and basic filtering</li>
+                </ul>
+                {% if usage %}
+                    <div class="small text-muted">
+                        Current usage: {{ usage.created_count }}/{{ usage.create_limit }} created,
+                        {{ usage.joined_count }}/{{ usage.join_limit }} joined.
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+
+    <div class="col-lg-6">
+        <article class="card app-card h-100 border-0 premium-plan-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h2 class="h4 mb-0">Premium Plan</h2>
+                    <span class="plan-pill premium">Unlock all features</span>
+                </div>
+                <p class="text-muted">For power users managing larger study communities.</p>
+                <ul class="detail-list mb-4">
+                    <li>Unlimited groups created and joined</li>
+                    <li>Private invite-only groups</li>
+                    <li>Advanced filters</li>
+                    <li>Premium chat experience</li>
+                    <li>Group analytics dashboard</li>
+                </ul>
+
+                {% if is_premium_user and active_subscription %}
+                    <div class="empty-state rounded-4 p-3 mb-3">
+                        <p class="mb-1"><strong>Premium active</strong></p>
+                        <p class="small text-muted mb-0">Valid until {{ active_subscription.end_date.strftime('%d %b %Y') }}</p>
+                    </div>
+                {% else %}
+                    <div class="d-flex gap-2 flex-wrap">
+                        <form method="post" action="{{ url_for('subscription.upgrade') }}" class="js-loading-form">
+                            <input type="hidden" name="cycle" value="monthly">
+                            <button type="submit" class="btn btn-primary" data-loading-label="Upgrading...">Upgrade Monthly</button>
+                        </form>
+                        <form method="post" action="{{ url_for('subscription.upgrade') }}" class="js-loading-form">
+                            <input type="hidden" name="cycle" value="yearly">
+                            <button type="submit" class="btn btn-outline-secondary" data-loading-label="Upgrading...">Upgrade Yearly</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}

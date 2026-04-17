@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Groups | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="groups-toolbar mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Discover groups</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">Browse Study Groups</h1>
+        <p class="text-muted mb-0">Filter by subject or schedule, join faster with invite links, and manage ownership safely.</p>
+    </div>
+    <a class="btn btn-primary px-4" href="{{ url_for('group.create_group') }}">
+        <i class="bi bi-plus-circle me-1"></i>Create Group
+    </a>
+</section>
+
+<section class="card app-card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="filter-row">
+            <div>
+                <label for="subjectFilter" class="form-label fw-semibold">Subject</label>
+                <input id="subjectFilter" type="text" name="subject" value="{{ subject_filter }}" placeholder="e.g., Calculus" class="form-control">
+            </div>
+            <div>
+                <label for="timeFilter" class="form-label fw-semibold">Schedule</label>
+                <input id="timeFilter" type="text" name="time" value="{{ time_filter }}" placeholder="e.g., Tue 5PM" class="form-control">
+            </div>
+            <div>
+                <label for="creatorFilter" class="form-label fw-semibold d-flex align-items-center gap-2">
+                    <span>Creator (Advanced)</span>
+                    {% if not is_premium_user %}
+                        <span class="badge-soft">Premium</span>
+                    {% endif %}
+                </label>
+                <input
+                    id="creatorFilter"
+                    type="text"
+                    name="creator"
+                    value="{{ creator_filter }}"
+                    placeholder="e.g., Ava"
+                    class="form-control"
+                    {% if not is_premium_user %}disabled{% endif %}
+                >
+            </div>
+            <div class="d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary px-4">Apply</button>
+                {% if subject_filter or time_filter or creator_filter %}
+                    <a href="{{ url_for('group.browse_groups') }}" class="btn btn-outline-secondary px-4">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+        {% if not is_premium_user %}
+            <div class="premium-hint mt-3">
+                Advanced filters are available on Premium.
+                <a href="{{ url_for('subscription.plans') }}">Upgrade now</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if groups %}
+    <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        {% for group in groups %}
+            {% set is_joined = group.id in joined_group_ids %}
+            {% set is_full = group.current_member_count >= group.max_members %}
+            {% set is_creator = group.creator_id == current_user.id %}
+            <div class="col">
+                <article class="card app-card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <span class="badge app-badge mb-2">{{ group.subject }}</span>
+                                <h2 class="h5 fw-bold mb-1">{{ group.subject }}</h2>
+                            </div>
+                            <span class="member-pill"><i class="bi bi-people me-1"></i>{{ group.current_member_count }}/{{ group.max_members }}</span>
+                        </div>
+
+                        <p class="text-muted flex-grow-1 mb-3">{{ group.description }}</p>
+
+                        <div class="group-meta mb-3">
+                            <span class="member-pill"><i class="bi bi-clock-history me-1"></i>{{ group.schedule }}</span>
+                            <span class="member-pill"><i class="bi bi-person-circle me-1"></i>{{ group.creator.name }}</span>
+                            {% if is_joined %}
+                                <span class="badge-soft">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    {{ joined_roles.get(group.id)|title }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {% if is_joined and joined_roles.get(group.id) in ['admin', 'moderator'] %}
+                            {% set invite_url = url_for('group.join_group_by_invite', invite_token=group.invite_token, _external=True) %}
+                            <div class="invite-link-block mb-3">
+                                <label class="small text-muted d-block mb-1">Invite link</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" value="{{ invite_url }}" readonly>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary copy-invite-btn"
+                                        data-copy-text="{{ invite_url }}"
+                                    >
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if is_joined %}
+                            <div class="group-link-row mb-3">
+                                <a href="{{ url_for('chat.group_chat', group_id=group.id) }}" class="text-decoration-none text-teal fw-semibold">Chat</a>
+                                <a href="{{ url_for('group.group_analytics', group_id=group.id) }}" class="text-decoration-none text-teal fw-semibold">Analytics</a>
+                                {% if joined_roles.get(group.id) == 'admin' %}
+                                    <a href="{{ url_for('group.manage_group', group_id=group.id) }}" class="text-decoration-none text-teal fw-semibold">Manage</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            {% if is_joined %}
+                                {% if is_creator %}
+                                    {% if group.current_member_count > 1 %}
+                                        <form method="post" action="{{ url_for('group.leave_group', group_id=group.id) }}" class="transfer-form js-loading-form">
+                                            <select name="transfer_user_id" class="form-select form-select-sm" required>
+                                                <option value="">Transfer ownership to...</option>
+                                                {% for member in group.members %}
+                                                    {% if member.user_id != current_user.id %}
+                                                        <option value="{{ member.user_id }}">{{ member.user.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm px-3" data-loading-label="Transferring...">Transfer &amp; Leave</button>
+                                        </form>
+                                    {% else %}
+                                        <span class="badge-soft">Add a member before leaving</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge-soft"><i class="bi bi-check-circle me-1"></i>Joined</span>
+                                    <form method="post" action="{{ url_for('group.leave_group', group_id=group.id) }}" class="js-loading-form">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm px-3" data-loading-label="Leaving...">Leave</button>
+                                    </form>
+                                {% endif %}
+                            {% elif is_full %}
+                                <span class="badge-soft">Group is full</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-3" disabled>Join</button>
+                            {% else %}
+                                <span class="text-muted small">Open seats available</span>
+                                <form method="post" action="{{ url_for('group.join_group', group_id=group.id) }}" class="js-loading-form">
+                                    <button type="submit" class="btn btn-primary btn-sm px-3" data-loading-label="Joining...">Join</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state text-center rounded-4 p-5 shadow-sm">
+        <i class="bi bi-search display-6 text-teal"></i>
+        <h2 class="h4 mt-3 mb-2">No groups matched your filters</h2>
+        <p class="text-muted mb-0">Try broader keywords or create a new group to get started.</p>
+    </div>
+{% endif %}
+{% endblock %}

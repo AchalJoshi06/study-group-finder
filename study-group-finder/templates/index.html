@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="hero-shell rounded-5 overflow-hidden mb-5">
+    <div class="row align-items-center g-4 hero-grid">
+        <div class="col-lg-7">
+            <span class="hero-badge"><i class="bi bi-lightning-charge-fill me-2"></i>Smart study matching for modern learners</span>
+            <h1 class="display-4 fw-bold mt-3 mb-3 hero-title">Find the right study group, faster.</h1>
+            <p class="lead text-muted mb-4 hero-copy">Create groups, discover peers, and match by subject and availability in a clean dashboard built for productive collaboration.</p>
+            <div class="d-flex flex-wrap gap-3">
+                {% if current_user.is_authenticated %}
+                    <a class="btn btn-primary btn-lg rounded-pill px-4" href="{{ url_for('user.dashboard') }}">Open Dashboard</a>
+                    <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" href="{{ url_for('group.browse_groups') }}">Browse Groups</a>
+                {% else %}
+                    <a class="btn btn-primary btn-lg rounded-pill px-4" href="{{ url_for('auth.register') }}">Get Started</a>
+                    <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" href="{{ url_for('auth.login') }}">Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="hero-card shadow-lg rounded-5 p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <span class="stat-chip"><i class="bi bi-graph-up-arrow me-2"></i>Active now</span>
+                    <span class="text-muted small">Study Group Finder</span>
+                </div>
+                <div class="mini-stat mb-3">
+                    <div>
+                        <div class="mini-stat-label">Groups matched</div>
+                        <div class="mini-stat-value">Fast</div>
+                    </div>
+                    <i class="bi bi-people-fill stat-icon"></i>
+                </div>
+                <div class="mini-stat mb-3">
+                    <div>
+                        <div class="mini-stat-label">Availability sync</div>
+                        <div class="mini-stat-value">Simple</div>
+                    </div>
+                    <i class="bi bi-calendar2-check stat-icon"></i>
+                </div>
+                <div class="mini-stat">
+                    <div>
+                        <div class="mini-stat-label">Group creation</div>
+                        <div class="mini-stat-value">One click</div>
+                    </div>
+                    <i class="bi bi-plus-circle-fill stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-3 d-flex align-items-end justify-content-between gap-3 flex-wrap">
+    <div>
+        <h2 class="section-title mb-1">Recent Study Groups</h2>
+        <p class="text-muted mb-0">Fresh groups from the community, arranged in a clean card grid.</p>
+    </div>
+    <a class="text-decoration-none fw-semibold text-teal" href="{{ url_for('group.browse_groups') }}">View all groups <i class="bi bi-arrow-right-short"></i></a>
+</section>
+
+{% if recent_groups %}
+    <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        {% for group in recent_groups %}
+            <div class="col">
+                <article class="card app-card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                            <div>
+                                <span class="badge app-badge mb-2">{{ group.subject }}</span>
+                                <h3 class="h5 fw-bold mb-1">{{ group.subject }}</h3>
+                            </div>
+                            <span class="member-pill"><i class="bi bi-people me-1"></i>{{ group.current_member_count }}/{{ group.max_members }}</span>
+                        </div>
+                        <p class="text-muted flex-grow-1">{{ group.description }}</p>
+                        <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
+                            <div class="small text-muted"><i class="bi bi-clock-history me-1"></i>{{ group.schedule }}</div>
+                            {% if current_user.is_authenticated %}
+                                <form method="post" action="{{ url_for('group.join_group', group_id=group.id) }}" class="js-loading-form">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3" data-loading-label="Joining...">Join</button>
+                                </form>
+                            {% else %}
+                                <a class="btn btn-primary btn-sm rounded-pill px-3" href="{{ url_for('auth.login') }}">Join</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state text-center rounded-4 p-5 shadow-sm">
+        <i class="bi bi-journal-x display-6 text-teal"></i>
+        <h3 class="mt-3 mb-2">No study groups yet</h3>
+        <p class="text-muted mb-0">Be the first to create a group and start matching with classmates.</p>
+    </div>
+{% endif %}
+{% endblock %}

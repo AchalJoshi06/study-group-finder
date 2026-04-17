@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Group Analytics | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-graph-up-arrow me-2"></i>Premium Analytics</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">{{ group.subject }} Analytics</h1>
+        <p class="text-muted mb-0">Monitor growth and engagement trends for your study group.</p>
+    </div>
+    <a class="btn btn-outline-secondary px-4" href="{{ url_for('group.browse_groups') }}">Back to Browse</a>
+</section>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <article class="stat-tile h-100">
+            <div class="stat-label">Total Members</div>
+            <div class="stat-value">{{ analytics.total_members }}</div>
+        </article>
+    </div>
+    <div class="col-md-4">
+        <article class="stat-tile h-100">
+            <div class="stat-label">Joins (Last 7 Days)</div>
+            <div class="stat-value">{{ analytics.joins_last_7_days }}</div>
+        </article>
+    </div>
+    <div class="col-md-4">
+        <article class="stat-tile h-100">
+            <div class="stat-label">Activity Count</div>
+            <div class="stat-value">{{ analytics.activity_count }}</div>
+        </article>
+    </div>
+</div>
+
+<section class="card app-card border-0 mt-4">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-3">Activity Breakdown</h2>
+        <div class="d-flex gap-3 flex-wrap">
+            <span class="member-pill"><i class="bi bi-chat-square-text me-1"></i>Messages: {{ analytics.message_activity_count }}</span>
+            <span class="member-pill"><i class="bi bi-calendar-event me-1"></i>Sessions: {{ analytics.session_activity_count }}</span>
+            <span class="badge-soft">Your role: {{ role|title }}</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

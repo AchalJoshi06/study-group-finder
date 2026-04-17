@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Group | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-plus-circle-fill me-2"></i>New study group</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">Create a group in minutes</h1>
+        <p class="text-muted mb-0">Add a clear topic and schedule so the right people can discover and join your group faster.</p>
+    </div>
+    <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('group.browse_groups') }}">Back to Browse</a>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <article class="card app-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 p-lg-5">
+                <form method="post" class="d-grid gap-3 js-loading-form">
+                    <div>
+                        <label for="subject" class="form-label fw-semibold">Subject</label>
+                        <div class="input-group app-input-group">
+                            <span class="input-group-text"><i class="bi bi-book"></i></span>
+                            <input id="subject" type="text" name="subject" class="form-control" placeholder="e.g., Calculus II" value="{{ request.form.get('subject', '') }}" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea id="description" name="description" rows="4" class="form-control" placeholder="What will your group cover?" required>{{ request.form.get('description', '') }}</textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label for="schedule" class="form-label fw-semibold">Schedule</label>
+                            <div class="input-group app-input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                <input id="schedule" type="text" name="schedule" class="form-control" placeholder="e.g., Mon 6:00 PM" value="{{ request.form.get('schedule', '') }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="max_members" class="form-label fw-semibold">Max Members</label>
+                            <input id="max_members" type="number" name="max_members" min="2" value="{{ request.form.get('max_members', '5') }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="premium-option-block">
+                        <label class="form-label fw-semibold mb-2">Group Privacy</label>
+                        <div class="form-check premium-check">
+                            <input
+                                id="is_private"
+                                type="checkbox"
+                                name="is_private"
+                                class="form-check-input"
+                                {% if request.form.get('is_private') %}checked{% endif %}
+                                {% if not is_premium_user %}disabled{% endif %}
+                            >
+                            <label class="form-check-label" for="is_private">
+                                Make this a private invite-only group
+                            </label>
+                        </div>
+                        {% if not is_premium_user %}
+                            <p class="form-help mb-0 mt-2">Private group creation is a Premium feature.</p>
+                            <a class="btn btn-outline-secondary btn-sm mt-2" href="{{ url_for('subscription.plans') }}">Upgrade to Premium</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-end flex-wrap gap-2 mt-2">
+                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('group.browse_groups') }}">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4" data-loading-label="Creating...">Create Group</button>
+                    </div>
+                </form>
+            </div>
+        </article>
+    </div>
+
+    <div class="col-lg-4">
+        <aside class="card app-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3">Tips for better matches</h2>
+                <ul class="detail-list mb-0">
+                    <li>Use a specific subject name so people can find it quickly.</li>
+                    <li>Include a clear weekly time format in the schedule field.</li>
+                    <li>Keep the group size realistic to improve session quality.</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

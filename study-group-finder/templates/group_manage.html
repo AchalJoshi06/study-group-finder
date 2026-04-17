@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Group | Study Group Finder{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <span class="hero-badge"><i class="bi bi-sliders2 me-2"></i>Group Management</span>
+        <h1 class="h2 fw-bold mt-3 mb-1">Manage {{ group.subject }}</h1>
+        <p class="text-muted mb-0">Promote members, assign moderators, and maintain healthy group structure.</p>
+    </div>
+    <a class="btn btn-outline-secondary px-4" href="{{ url_for('group.browse_groups') }}">Back to Browse</a>
+</section>
+
+<section class="card app-card border-0">
+    <div class="card-body p-4 p-lg-5">
+        {% if memberships %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Role</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for membership in memberships %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ membership.user.name }}</div>
+                                    <div class="small text-muted">{{ membership.user.email }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge-soft">{{ membership.role|title }}</span>
+                                </td>
+                                <td class="text-end">
+                                    {% if membership.user_id == group.creator_id %}
+                                        <span class="small text-muted">Creator</span>
+                                    {% else %}
+                                        <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                            <form method="post" class="d-flex gap-2 js-loading-form">
+                                                <input type="hidden" name="action" value="set_role">
+                                                <input type="hidden" name="target_user_id" value="{{ membership.user_id }}">
+                                                <select name="new_role" class="form-select form-select-sm manage-role-select">
+                                                    <option value="member" {{ 'selected' if membership.role == 'member' else '' }}>Member</option>
+                                                    <option value="moderator" {{ 'selected' if membership.role == 'moderator' else '' }}>Moderator</option>
+                                                    <option value="admin" {{ 'selected' if membership.role == 'admin' else '' }}>Admin</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm" data-loading-label="Saving...">Save</button>
+                                            </form>
+
+                                            <form method="post" class="js-loading-form">
+                                                <input type="hidden" name="action" value="remove_member">
+                                                <input type="hidden" name="target_user_id" value="{{ membership.user_id }}">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm" data-loading-label="Removing...">Remove</button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state rounded-4 p-4">
+                <p class="mb-0 text-muted">No members found in this group.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
