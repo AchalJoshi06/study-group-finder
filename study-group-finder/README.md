@@ -82,3 +82,41 @@ After seeding:
 
 - To use a custom secret key, set `SECRET_KEY` in environment variables.
 - To use a custom database path, set `DATABASE_URL`.
+
+## Deploy on Render
+
+This project includes a Render blueprint file at `render.yaml`.
+
+### Option 1: Deploy with Blueprint (Recommended)
+
+1. Push this repository to GitHub.
+2. In Render, click **New +** -> **Blueprint**.
+3. Connect your GitHub repository.
+4. Render will detect `render.yaml` and create:
+	 - one web service (`study-group-finder`)
+	 - one PostgreSQL database (`study-group-finder-db`)
+
+### Option 2: Manual Service Setup
+
+Use these settings for the web service:
+
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app`
+- Environment variables:
+	- `FLASK_CONFIG=production`
+	- `SECRET_KEY=<your-random-secret>`
+	- `DATABASE_URL=<your-render-postgres-connection-string>`
+
+### After First Deploy
+
+Open the Render web service shell and run:
+
+```bash
+flask db upgrade
+```
+
+Optional sample data:
+
+```bash
+flask seed-db
+```
