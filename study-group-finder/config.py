@@ -21,6 +21,12 @@ class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
     SQLALCHEMY_DATABASE_URI = _get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    STRIPE_PRICE_MONTHLY_ID = os.getenv("STRIPE_PRICE_MONTHLY_ID", "")
+    STRIPE_PRICE_YEARLY_ID = os.getenv("STRIPE_PRICE_YEARLY_ID", "")
+    PREMIUM_MONTHLY_PRICE = os.getenv("PREMIUM_MONTHLY_PRICE", "$9.99")
+    PREMIUM_YEARLY_PRICE = os.getenv("PREMIUM_YEARLY_PRICE", "$89.99")
 
 
 class DevelopmentConfig(BaseConfig):

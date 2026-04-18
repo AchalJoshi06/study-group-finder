@@ -43,6 +43,12 @@
                     <span class="plan-pill premium">Unlock all features</span>
                 </div>
                 <p class="text-muted">For power users managing larger study communities.</p>
+                {% if pricing %}
+                    <div class="mb-3">
+                        <span class="member-pill">Monthly: {{ pricing.monthly_price }}</span>
+                        <span class="member-pill">Yearly: {{ pricing.yearly_price }}</span>
+                    </div>
+                {% endif %}
                 <ul class="detail-list mb-4">
                     <li>Unlimited groups created and joined</li>
                     <li>Private invite-only groups</li>
@@ -60,13 +66,36 @@
                     <div class="d-flex gap-2 flex-wrap">
                         <form method="post" action="{{ url_for('subscription.upgrade') }}" class="js-loading-form">
                             <input type="hidden" name="cycle" value="monthly">
-                            <button type="submit" class="btn btn-primary" data-loading-label="Upgrading...">Upgrade Monthly</button>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                data-loading-label="Redirecting..."
+                                {% if pricing and not pricing.billing_ready %}disabled{% endif %}
+                            >
+                                Pay Monthly
+                            </button>
                         </form>
                         <form method="post" action="{{ url_for('subscription.upgrade') }}" class="js-loading-form">
                             <input type="hidden" name="cycle" value="yearly">
-                            <button type="submit" class="btn btn-outline-secondary" data-loading-label="Upgrading...">Upgrade Yearly</button>
+                            <button
+                                type="submit"
+                                class="btn btn-outline-secondary"
+                                data-loading-label="Redirecting..."
+                                {% if pricing and not pricing.billing_ready %}disabled{% endif %}
+                            >
+                                Pay Yearly
+                            </button>
                         </form>
                     </div>
+                    {% if pricing and not pricing.billing_ready %}
+                        <p class="small text-muted mt-3 mb-0">
+                            Billing is currently unavailable. Set payment configuration to enable upgrades.
+                        </p>
+                    {% else %}
+                        <p class="small text-muted mt-3 mb-0">
+                            Premium is activated only after verified successful payment.
+                        </p>
+                    {% endif %}
                 {% endif %}
             </div>
         </article>
